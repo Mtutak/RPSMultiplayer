@@ -41,41 +41,22 @@ connectionsRef.on("value", function (snap) {
 });
 // ROCK PAPER SCISSORS LOGIC
 // Declares the tallies to 0 
+var userName = '';
 var wins = 0;
 var losses = 0;
 var ties = 0;
+var haveOpponent = false;
+var Num_Players = 2;
 var userGuess = '';
+var userGuessTwo = '';
 var oppChoices = ['rock', 'paper', 'scissors'];
+// var count = 0;
+var turn = 1;
+var a = false;
+var playerNumber = 1;
+var ties = 0;
+var playersObject = {};
 nameSelection();
-$('.userSelection').on('click', function () {
-    userGuess = $(this).text();
-    console.log('user guess: ' + userGuess);
-    $('.listchoices').addClass('hidden');
-    $('.choice').append('<img class=userSelection src=assets/images/' + userGuess + '.png>');
-    // This sets the computer guess equal to the random.
-    var oppGuess = oppChoices[Math.floor(Math.random() * oppChoices.length)];
-    console.log('opponent random guess: ' + oppGuess);
-    // Making sure the user chooses r, p, or s
-    if ((userGuess == 'rock') || (userGuess == 'paper') || (userGuess == 'scissors')) {
-        console.log('Game Selections Success!');
-        // Test to determine winner 
-        if ((userGuess == 'rock') && (oppGuess == 'scissors')) {
-            wins++;
-        } else if ((userGuess == 'rock') && (oppGuess == 'paper')) {
-            losses++;
-        } else if ((userGuess == 'scissors') && (oppGuess == 'rock')) {
-            losses++;
-        } else if ((userGuess == 'scissors') && (oppGuess == 'paper')) {
-            wins++;
-        } else if ((userGuess == 'paper') && (oppGuess == 'rock')) {
-            wins++;
-        } else if ((userGuess == 'paper') && (oppGuess == 'scissors')) {
-            losses++;
-        } else if (userGuess == oppGuess) {
-            ties++;
-        }
-    }
-});
 
 function gameStart() {}
 
@@ -83,22 +64,152 @@ function nameSelection() {
     // Update firebase with Chat node, Player node containing Name, Choice, Wins and Losses
     $('#nameSubmit').on('click', function () {
         userName = $('#name').val().trim();
-        dB.ref('/connections/' + userName + '/').push({
-            username: userName
-        });
-        dB.ref('players/1/').set({
-            loss: losses,
-            name: userName,
-            win: wins
+        dB.ref('players/').once("value", function (snap) {
+            a = snap.hasChildren(); // true
+            if (a === false) {
+                playerNumber = 1;
+                playerOneStatus();
+            } else if (a === true) {
+                playerNumber = 2;
+                playerTwoStatus();
+            }
+            dB.ref('/players/' + playerNumber + '/').set({
+                loss: losses,
+                name: userName,
+                win: wins,
+                ties: ties
+            });
         });
         $('#nameForm').addClass('hidden');
-        $('#playerOneStatus').addClass('hidden');
-        $('.choice').removeClass('hidden');
         $('#playerTwoResults').removeClass('hidden');
         return false;
     });
 }
-FriendlyChat.prototype.loadMessages = function () {
+playGame();
+
+function getSnapOfPlayers() {
+    dB.ref('players/').on('value', function (snap) {
+        playersObject = snap.val();
+        console.log(playersObject[1].name);
+    });
+}
+
+function playerOneStatus() {
+    $('#playerOneStatus').addClass('hidden');
+    $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 1</p>');
+    $('#currentStatus').html('<p>Its Your Turn!</p>');
+    $('.choice').removeClass('hidden');
+}
+
+function playerTwoStatus() {
+    $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 2</p>');
+    $('#currentStatus').html('<p>Waiting on Player 1 To Choose!</p>');
+}
+//need to set turn to firebase to track both computers being able to see
+function playGame() {
+    var turn = 1; //placeholder
+    $('.userSelection').on('click', function () {
+        userGuess = $(this).text();
+        console.log('user guess: ' + userGuess);
+        $('.listchoices').addClass('hidden');
+        if (turn === 1) {
+            dB.ref('players/1/').update({
+                choice: userGuess
+            });
+        }
+        $('.choice').append('<img class=userSelection src=assets/images/' + userGuess + '.png>');
+        // This sets the computer guess equal to the random.
+        turn++;
+        console.log(turn);
+        if (turn === 2) {
+            $('.choice2').removeClass('hidden');
+            $('.userSelection2').on('click', function () {
+                userGuessTwo = $(this).text();
+                console.log('user guess 2: ' + userGuessTwo);
+                $('.listchoices2').addClass('hidden');
+                dB.ref('players/2/').update({
+                    choice: userGuess
+                });
+                $('.choice2').append('<img class=userSelection2 src=assets/images/' + userGuessTwo + '.png>');
+            });
+        }
+        // Making sure the user chooses r, p, or s
+        if ((userGuess == 'rock') || (userGuess == 'paper') || (userGuess == 'scissors')) {
+            console.log('Game Selections Success!');
+            // Test to determine winner 
+            if ((userGuess == 'rock') && (oppGuess == 'scissors')) {
+                wins++;
+            } else if ((userGuess == 'rock') && (oppGuess == 'paper')) {
+                losses++;
+            } else if ((userGuess == 'scissors') && (oppGuess == 'rock')) {
+                losses++;
+            } else if ((userGuess == 'scissors') && (oppGuess == 'paper')) {
+                wins++;
+            } else if ((userGuess == 'paper') && (oppGuess == 'rock')) {
+                wins++;
+            } else if ((userGuess == 'paper') && (oppGuess == 'scissors')) {
+                losses++;
+            } else if (userGuess == oppGuess) {
+                ties++;
+            }
+        }
+        // //rock, paper, scissors logic and return whether you won, lost, or had a draw.
+        //     switch(userGuess) {
+        //     case 'rock':
+        //       switch(oppGuess) {
+        //             case 'rock':
+        //                 return 'draw';
+        //             case 'paper':
+        //                 return 'lose';
+        //             case 'scissors':
+        //                 return 'win';
+        //         }
+        //       break;
+        //     case 'paper':
+        //         switch(oppGuess) {
+        //             case 'rock':
+        //                 return 'win';
+        //             case 'paper':
+        //                 return 'draw';
+        //             case 'scissors':
+        //                 return 'lose';
+        //         }
+        //       break;
+        //     case 'scissors':
+        //         switch(oppGuess) {
+        //             case 'rock':
+        //                 return 'lose';
+        //             case 'paper':
+        //                 return 'win';
+        //             case 'scissors':
+        //                 return 'draw';
+        //         }
+        //         break;
+        //     }
+        //  }
+    });
+}
+//MESSAGING DESIGN
+function displayMessage(key, name, text) {
+    var div = document.getElementById(key);
+    // If an element for that message does not exists yet we create it.
+    if (!div) {
+        var container = document.createElement('div');
+        container.innerHTML = FriendlyChat.MESSAGE_TEMPLATE;
+        div = container.firstChild;
+        div.setAttribute('id', key);
+        this.messageList.appendChild(div);
+    }
+    div.querySelector('.name').textContent = name;
+    var messageElement = div.querySelector('.message');
+    if (text) { // If the message is text.
+        messageElement.textContent = text;
+        // Replace all line breaks by <br>.
+        messageElement.innerHTML = messageElement.innerHTML.replace(/\n/g, '<br>');
+    }
+}
+
+function loadMessages() {
     // Reference to the /messages/ database path.
     messagesRef = firebase.database().ref('messages');
     // Make sure we remove all previous listeners.
@@ -106,8 +217,25 @@ FriendlyChat.prototype.loadMessages = function () {
     // Loads the last 12 messages and listen for new ones.
     var setMessage = function (data) {
         var val = data.val();
-        this.displayMessage(data.key, val.name, val.text, val.photoUrl, val.imageUrl);
+        displayMessage(data.key, val.name, val.text);
     }.bind(this);
     this.messagesRef.limitToLast(12).on('child_added', setMessage);
     this.messagesRef.limitToLast(12).on('child_changed', setMessage);
-};
+}
+// Saves a new message in FB
+function saveMessage(e) {
+    e.preventDefault();
+    // Check that the user entered a message and is signed in.
+    if (this.messageInput.value) {
+        var currentUser = this.auth.currentUser;
+        // Add a new message entry to the FB. 
+        this.messagesRef.push({
+            name: currentUser.displayName,
+            text: this.messageInput.value
+        }).then(function () {
+            //clear textfield
+        }).catch(function (error) {
+            console.error('Error writing message to DB', error);
+        });
+    }
+}

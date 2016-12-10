@@ -31,13 +31,19 @@
 		</button>
 	</form>
 	<!-- Display after Login -->
-	<div id="loginMessage">
+	<div class="row">
+		<div id="loginMessage" class="col-md-12">
+		</div>
 	</div>
-	<div id='currentStatus'>
+	<div class="row">
+		<div id='currentStatus' class="col-md-12">
+
+		</div>
 	</div>
+
 	<!-- Main Gaming Section -->
 <div class="row main">
-			<div id="currentPlayer" class="col-sm-4 pick fighter">
+			<div id="currentPlayer" class="col-sm-4 pick ">
 				
 				<div id="playerOneStatus">
 					<h3 id='playerOneWait'>Waiting on Player 1</h3>
@@ -63,7 +69,13 @@
 				</div>
 				<div id="playerTwoResults" class="hidden">
 					<h2><b>Opponent Name Placeholder</b></h2>
-					
+					<div class="choice hidden">
+						<ul class='listchoices'>
+							<li><button class='userSelection'>rock</button></li>
+							<li><button class='userSelection'>paper</button></li>
+							<li><button class='userSelection'>scissors</button></li>
+						</ul>
+					</div>
 					<div class="wins">Wins: </div>
 					<div class='losses'>Losses: </div>
 				</div>
