@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="RPS Game for Homework 7">
+    <meta name="author" content="Matthew Tutak">
+	<title>RPS Multiplayer</title>
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+	<script src="https://www.gstatic.com/firebasejs/3.5.2/firebase.js">
+	</script>
+</head>
+<body>
+<div class="container">
+	<div class="jumbotron">
+		<h1><span id="red">ROCK PAPER SCISSORS XTREME</span> <img id="ball" src=assets/images/dragonball.png />  <span id="yellow">2-PLAYA GAME!</span></h1>
+		<h2 id="watchers">Users Count: </h2>
+		<hr>
+	</div>
+</div>
+	<!-- Login Set Username -->
+	<form id='nameForm'>
+		<label for="name">
+		User Name:	
+		</label>
+		<input type="text" id="name" placeholder="Pick A Name">
+		<button id="nameSubmit">
+			Submit
+		</button>
+	</form>
+	<!-- Display after Login -->
+	<div id="loginMessage">
+	</div>
+	<div id='currentStatus'>
+	</div>
+	<!-- Main Gaming Section -->
+<div class="row main">
+			<div id="currentPlayer" class="col-sm-4 pick fighter">
+				
+				<div id="playerOneStatus">
+					<h3 id='playerOneWait'>Waiting on Player 1</h3>
+					<h2 class='hidden'><b>Username Placeholder</b></h2>
+				</div>
+				<div class="choice hidden">
+					<ul class='listchoices'>
+						<li><button class='userSelection'>rock</button></li>
+						<li><button class='userSelection'>paper</button></li>
+						<li><button class='userSelection'>scissors</button></li>
+					</ul>
+				</div>
+				<div class="wins">Wins: </div>
+				<div class='losses'>Losses: </div>
+			</div>
+		<div id="results" class="col-sm-4 pick fighter">
+				<h2><b>Results</b></h2>
+				<h3>Display Winner Name Placeholder</h3>
+		</div>
+		<div id="opponentPlayer" class="col-sm-4 pick fighter">
+				<div id="playerTwoStatus">
+					<h3 id='playerTwoWait'>Waiting on Player 2</h3>
+				</div>
+				<div id="playerTwoResults" class="hidden">
+					<h2><b>Opponent Name Placeholder</b></h2>
+					
+					<div class="wins">Wins: </div>
+					<div class='losses'>Losses: </div>
+				</div>
+		</div>
+</div> 
+	<!-- Firebase Chatbox -->
+	<!-- <div class="chatbox">
+		<div class="messages"></div>
+		<form>
+			<input type="text">
+			<button>
+				Send
+			</button>
+		</form>
+	</div> -->
+	<div class="container">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+            	<!-- HEADING OF CHAT BOX -->
+                <div class="panel-heading" id="accordion">
+                    <span class="glyphicon glyphicon-comment"></span> Chat
+                </div>
+            <div class="panel" id="one">
+                <div class="panel-body">
+                	<!-- CHAT BODY ============== -->
+                    <ul class="chat">
+
+                    	<!-- MESSAGE ONE -->
+                        <li class="left clearfix"><span class="chat-img pull-left">
+                            <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
+                        </span>
+                            <div class="chat-body clearfix">
+                                <div class="header">
+                                    <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted">
+                                        <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
+                                </div>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                    dolor, quis ullamcorper ligula sodales.
+                                </p>
+                            </div>
+                        </li>
+                        <!-- MESSAGE TWO -->
+                        <li class="right clearfix"><span class="chat-img pull-right">
+                            <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
+                        </span>
+                            <div class="chat-body clearfix">
+                                <div class="header">
+                                    <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>
+                                    <strong class="pull-right primary-font">Bhaumik Patel</strong>
+                                </div>
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
+                                    dolor, quis ullamcorper ligula sodales.
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- INPUT MESSAGE AND BUTTON -->
+                <div class="panel-footer">
+                    <div class="input-group">
+                        <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+                            <button class="btn btn-warning btn-sm" id="btn-chat">
+                                Send
+                            </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+<script type="text/javascript" src="assets/javascript/app.js"></script>
+</body>
+</html>
