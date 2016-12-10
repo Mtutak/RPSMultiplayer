@@ -13,9 +13,8 @@ var dB = firebase.database();
 // connectionsRef references a specific location in our database.
 // All of our connections will be stored in this directory.
 var connectionsRef = dB.ref("/connections");
-// '.info/connected' is a special location provided by Firebase that is updated every time
-// the client's connection state changes.
-// '.info/connected' is a boolean value, true if the client is connected and false if they are not.
+// updated every time the client's connection state changes.
+// '.info/connected' returns boolean, true if the client is connected and false if they are not.
 var connectedRef = dB.ref(".info/connected");
 // When the client's connection state changes...
 connectedRef.on("value", function (snap) {
@@ -25,10 +24,11 @@ connectedRef.on("value", function (snap) {
         var con = connectionsRef.push(true);
         // Remove user from the connection list when they disconnect.
         con.onDisconnect().remove();
-        connectionsRef.on('child_added', function (data) {
+        connectionsRef.orderByKey().limitToFirst(1).on('child_added', function (data) {
             var userKey = data.key;
             var userValue = data.val;
             console.log('Connections: ' + userKey);
+            playerOneKey = userKey;
         });
     }
     console.log('Is User Connected: ' + snap.val());
@@ -39,31 +39,30 @@ connectionsRef.on("value", function (snap) {
     // The number of online users is the number of children in the connections list.
     $("#watchers").html(snap.numChildren());
 });
-// ROCK PAPER SCISSORS LOGIC
+//Polluting The Global Space with some variables
 // Declares the tallies to 0 
 var userName = '';
 var wins = 0;
 var losses = 0;
 var ties = 0;
-var haveOpponent = false;
+//limits number of players to two
 var Num_Players = 2;
+//Storing RPS value Player One
 var userGuess = '';
+//Storing RPS value Player One
 var userGuessTwo = '';
-var oppChoices = ['rock', 'paper', 'scissors'];
-// var count = 0;
 var turn = 1;
 var a = false;
 var playerNumber = 1;
-var ties = 0;
 var playersObject = {};
 var playerOneName = '';
 var playerTwoName = '';
+var getCurrentTurn = '';
+var playerOneKey = '';
 nameSelection();
 
-function gameStart() {}
-
 function nameSelection() {
-    // Update firebase with Chat node, Player node containing Name, Choice, Wins and Losses
+    // Update firebase with Player node containing Name, Choice, Wins and Losses
     $('#nameSubmit').on('click', function () {
         userName = $('#name').val().trim();
         $('#nameForm').addClass('hidden');
@@ -104,15 +103,20 @@ function getSnapOfPlayers() {
 }
 
 function playerOneStatus() {
-    $('#playerOneStatus').addClass('hidden');
-    $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 1</p>');
-    $('#currentStatus').html('<p class="joining">Waiting On Player 2 to Join!</p>');
+    if (getCurrentTurn === 1) {
+        getSnapOfPlayers();
+        $('.choice').removeClass('hidden');
+        playGame();
+    } else {
+        $('#playerOneStatus').addClass('hidden');
+        $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 1</p>');
+        $('#currentStatus').html('<p class="joining">Waiting On Player 2 to Join!</p>');
+    }
 }
 
 function playerTwoStatus() {
     $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 2</p>');
     $('#currentStatus').html('<p>Waiting on Player 1 To Choose!</p>');
-    $('.choice').removeClass('hidden');
     var gameTurn = 1;
     dB.ref().update({
         turn: gameTurn
@@ -120,12 +124,14 @@ function playerTwoStatus() {
     getSnapOfPlayers();
     playGame();
 }
-//need to set turn to firebase to track both computers being able to see
+dB.ref('turn/').on('value', function (snap) {
+    getCurrentTurn = snap.val();
+    if (getCurrentTurn === 1) {
+        playerOneStatus();
+    }
+});
+
 function playGame() {
-    dB.ref('turn/').on('value', function (snap) {
-        getCurrentTurn = snap.val();
-        console.log(gameTurn);
-    });
     if (getCurrentTurn === 1) {
         $('#currentStatus').html('<p>Its Your Turn To Pick!</p>');
         $('.userSelection').on('click', function () {
@@ -157,24 +163,49 @@ function playGame() {
     // Making sure the user chooses r, p, or s
     if ((userGuess == 'rock') || (userGuess == 'paper') || (userGuess == 'scissors')) {
         console.log('Game Selections Success!');
+        dB.ref('players').on(child_added, function (snap) {
+            var gameStatus = snap.val();
+        });
         // Test to determine winner 
-        if ((userGuess == 'rock') && (oppGuess == 'scissors')) {
-            wins++;
-        } else if ((userGuess == 'rock') && (oppGuess == 'paper')) {
-            losses++;
-        } else if ((userGuess == 'scissors') && (oppGuess == 'rock')) {
-            losses++;
-        } else if ((userGuess == 'scissors') && (oppGuess == 'paper')) {
-            wins++;
-        } else if ((userGuess == 'paper') && (oppGuess == 'rock')) {
-            wins++;
-        } else if ((userGuess == 'paper') && (oppGuess == 'scissors')) {
-            losses++;
+        if ((userGuess == 'rock') && (userGuessTwo == 'scissors')) {
+            playerOneWin();
+        } else if ((userGuess == 'rock') && (userGuessTwo == 'paper')) {
+            playerTwoWin();
+        } else if ((userGuess == 'scissors') && (userGuessTwo == 'rock')) {
+            playerTwoWin();
+        } else if ((userGuess == 'scissors') && (userGuessTwo == 'paper')) {
+            playerOneWin();
+        } else if ((userGuess == 'paper') && (userGuessTwo == 'rock')) {
+            playerOneWin();
+        } else if ((userGuess == 'paper') && (userGuessTwo == 'scissors')) {
+            playerTwoWin();
         } else if (userGuess == oppGuess) {
             ties++;
         }
     }
-    // //rock, paper, scissors logic and return whether you won, lost, or had a draw.
+
+    function playerOneWin() {
+        dB.ref('players/1/').update({
+            win: wins++
+        });
+        $('#winsOne').html('<p>' + gameStatus[1].win + '</p>');
+        dB.ref('players/2/').update({
+            loss: losses++
+        });
+        $('#lossTwo').html('<p>' + gameStatus[2].loss + '</p>');
+    }
+
+    function playerTwoWin() {
+        dB.ref('players/2/').update({
+            win: wins++
+        });
+        $('#winsTwo').html('<p>' + gameStatus[2].win + '</p>');
+        dB.ref('players/1/').update({
+            loss: losses++
+        });
+        $('#lossOne').html('<p>' + gameStatus[1].loss + '</p>');
+    }
+    // //SWITCH CASE EXAMPLE OF GAME LOGIC
     //     switch(userGuess) {
     //     case 'rock':
     //       switch(oppGuess) {
@@ -211,22 +242,15 @@ function playGame() {
 }
 //MESSAGING DESIGN
 function displayMessage(key, name, text) {
-    var div = document.getElementById(key);
-    // If an element for that message does not exists yet we create it.
+    var div = $('#key');
     if (!div) {
-        var container = document.createElement('div');
-        container.innerHTML = FriendlyChat.MESSAGE_TEMPLATE;
+        //Need to create template and stylings to display message
         div = container.firstChild;
         div.setAttribute('id', key);
         this.messageList.appendChild(div);
     }
     div.querySelector('.name').textContent = name;
     var messageElement = div.querySelector('.message');
-    if (text) { // If the message is text.
-        messageElement.textContent = text;
-        // Replace all line breaks by <br>.
-        messageElement.innerHTML = messageElement.innerHTML.replace(/\n/g, '<br>');
-    }
 }
 
 function loadMessages() {
@@ -234,20 +258,19 @@ function loadMessages() {
     messagesRef = firebase.database().ref('messages');
     // Make sure we remove all previous listeners.
     messagesRef.off();
-    // Loads the last 12 messages and listen for new ones.
+    // Loads previous messages and listen for new ones.
     var setMessage = function (data) {
         var val = data.val();
         displayMessage(data.key, val.name, val.text);
     }.bind(this);
-    this.messagesRef.limitToLast(12).on('child_added', setMessage);
-    this.messagesRef.limitToLast(12).on('child_changed', setMessage);
+    messagesRef.limitToLast(8).on('child_added', displayMessage);
+    messagesRef.limitToLast(8).on('child_changed', displayMessage);
 }
 // Saves a new message in FB
 function saveMessage(e) {
     e.preventDefault();
-    // Check that the user entered a message and is signed in.
+    // Check that the user entered a message 
     if (this.messageInput.value) {
-        var currentUser = this.auth.currentUser;
         // Add a new message entry to the FB. 
         this.messagesRef.push({
             name: currentUser.displayName,

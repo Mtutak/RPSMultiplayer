@@ -16,7 +16,7 @@
 <div class="container">
 	<div class="jumbotron">
 		<h1><span id="red">ROCK PAPER SCISSORS XTREME 2-PLAYA GAME!</span></h1>
-		<h2 id="watchers">Users Count: </h2>
+		<h2 id="watchers">Online Count: </h2>
 		<hr>
 	</div>
 </div>
@@ -43,7 +43,7 @@
 
 	<!-- Main Gaming Section -->
 <div class="row main">
-			<div id="currentPlayer" class="col-sm-4 pick ">
+			<div id="currentPlayer" class="col-sm-4 pick clearfix">
 				
 				<div id="playerOneStatus">
 					<h3 id='playerOneWait'></h3>
@@ -56,14 +56,14 @@
 						<li><button class='userSelection'>scissors</button></li>
 					</ul>
 				</div>
-				<div class="wins">Wins: </div>
-				<div class='losses'>Losses: </div>
+				<div class="wins">Wins: <span id='winsOne'></span> </div>
+				<div class='losses'>Losses: <span id='lossOne'></span></div>
 			</div>
 		<div id="results" class="col-sm-4 pick fighter">
 				<h2><b>Results</b></h2>
 				<h3>Display Winner Name Placeholder</h3>
 		</div>
-		<div id="opponentPlayer" class="col-sm-4 pick fighter">
+		<div id="opponentPlayer" class="col-sm-4 pick clearfix">
 				<div id="playerTwoStatus">
 					<h3 id='playerTwoWait'></h3>
 					<h2 id='playerTwoName'></h2>
@@ -77,10 +77,11 @@
 							<li><button class='userSelection2'>scissors</button></li>
 						</ul>
 					</div>
-					<div class="wins">Wins: </div>
-					<div class='losses'>Losses: </div>
 				</div>
+					<div class="wins">Wins: <span id='winsTwo'></span></div>
+					<div class='losses'>Losses: <span id='lossTwo'></span></div>
 		</div>
+
 </div> 
 	<!-- Firebase Chatbox -->
 	<!-- <div class="chatbox">
@@ -107,12 +108,11 @@
 
                     	<!-- MESSAGE ONE -->
                         <li class="left clearfix"><span class="chat-img pull-left">
-                            <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" />
+                            <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User" class="img-circle" />
                         </span>
                             <div class="chat-body clearfix">
                                 <div class="header">
-                                    <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted">
-                                        <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
+                                    <strong class="primary-font">SuperMan</strong> 
                                 </div>
                                 <p>
                                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
@@ -122,12 +122,11 @@
                         </li>
                         <!-- MESSAGE TWO -->
                         <li class="right clearfix"><span class="chat-img pull-right">
-                            <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" />
+                            <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User" class="img-circle" />
                         </span>
                             <div class="chat-body clearfix">
                                 <div class="header">
-                                    <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small>
-                                    <strong class="pull-right primary-font">Bhaumik Patel</strong>
+                                    <strong class="pull-right primary-font">Batman</strong>
                                 </div>
                                 <p>
                                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare
