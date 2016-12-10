@@ -56,6 +56,8 @@ var a = false;
 var playerNumber = 1;
 var ties = 0;
 var playersObject = {};
+var playerOneName = '';
+var playerTwoName = '';
 nameSelection();
 
 function gameStart() {}
@@ -64,137 +66,148 @@ function nameSelection() {
     // Update firebase with Chat node, Player node containing Name, Choice, Wins and Losses
     $('#nameSubmit').on('click', function () {
         userName = $('#name').val().trim();
+        $('#nameForm').addClass('hidden');
         dB.ref('players/').once("value", function (snap) {
             a = snap.hasChildren(); // if pushed data awill return true
             if (a === false) {
                 playerNumber = 1;
+                dB.ref('/players/' + playerNumber + '/').set({
+                    loss: losses,
+                    name: userName,
+                    win: wins,
+                    ties: ties
+                });
                 playerOneStatus();
             } else if (a === true) {
                 playerNumber = 2;
+                dB.ref('/players/' + playerNumber + '/').set({
+                    loss: losses,
+                    name: userName,
+                    win: wins,
+                    ties: ties
+                });
                 playerTwoStatus();
             }
-            dB.ref('/players/' + playerNumber + '/').set({
-                loss: losses,
-                name: userName,
-                win: wins,
-                ties: ties
-            });
         });
-        $('#nameForm').addClass('hidden');
         return false;
-    });
-}
-playGame();
-
-function playerWaiting() {
-    dB.ref('players/').on('value', function (snap) {
-        playersObject = snap.val();
-        console.log(playersObject.length);
     });
 }
 
 function getSnapOfPlayers() {
     dB.ref('players/').on('value', function (snap) {
         playersObject = snap.val();
-        console.log(playersObject[1].name);
+        playerOneName = playersObject[1].name;
+        playerTwoName = playersObject[2].name;
+        $('#playerOneName').html('<b>' + playerOneName + '</b>');
+        $('#playerTwoName').html('<b>' + playerTwoName + '</b>');
     });
 }
 
 function playerOneStatus() {
     $('#playerOneStatus').addClass('hidden');
     $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 1</p>');
-    $('#currentStatus').html('<p>Its Your Turn!</p>');
-    $('.choice').removeClass('hidden');
+    $('#currentStatus').html('<p class="joining">Waiting On Player 2 to Join!</p>');
 }
 
 function playerTwoStatus() {
     $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 2</p>');
     $('#currentStatus').html('<p>Waiting on Player 1 To Choose!</p>');
-    $('#playerTwoResults').removeClass('hidden');
+    $('.choice').removeClass('hidden');
+    var gameTurn = 1;
+    dB.ref().update({
+        turn: gameTurn
+    });
+    getSnapOfPlayers();
+    playGame();
 }
 //need to set turn to firebase to track both computers being able to see
 function playGame() {
-    var turn = 1; //placeholder
-    $('.userSelection').on('click', function () {
-        userGuess = $(this).text();
-        console.log('user guess: ' + userGuess);
-        $('.listchoices').addClass('hidden');
-        if (turn === 1) {
+    dB.ref('turn/').on('value', function (snap) {
+        getCurrentTurn = snap.val();
+        console.log(gameTurn);
+    });
+    if (getCurrentTurn === 1) {
+        $('#currentStatus').html('<p>Its Your Turn To Pick!</p>');
+        $('.userSelection').on('click', function () {
+            userGuess = $(this).text();
+            console.log('user guess: ' + userGuess);
+            $('.listchoices').addClass('hidden');
             dB.ref('players/1/').update({
                 choice: userGuess
             });
-        }
-        $('.choice').append('<img class=userSelection src=assets/images/' + userGuess + '.png>');
-        // This sets the computer guess equal to the random.
-        turn++;
-        console.log(turn);
-        if (turn === 2) {
-            $('.choice2').removeClass('hidden');
-            $('.userSelection2').on('click', function () {
-                userGuessTwo = $(this).text();
-                console.log('user guess 2: ' + userGuessTwo);
-                $('.listchoices2').addClass('hidden');
-                dB.ref('players/2/').update({
-                    choice: userGuess
-                });
-                $('.choice2').append('<img class=userSelection2 src=assets/images/' + userGuessTwo + '.png>');
+            $('.choice').append('<img class=userSelection src=assets/images/' + userGuess + '.png>');
+            dB.ref('turn/').update({
+                turn: 2
             });
+        });
+    }
+    if (getCurrentTurn === 2) {
+        $('#playerTwoResults').removeClass('hidden');
+        $('.choice2').removeClass('hidden');
+        $('.userSelection2').on('click', function () {
+            userGuessTwo = $(this).text();
+            console.log('user guess 2: ' + userGuessTwo);
+            $('.listchoices2').addClass('hidden');
+            dB.ref('players/2/').update({
+                choice: userGuess
+            });
+            $('.choice2').append('<img class=userSelection2 src=assets/images/' + userGuessTwo + '.png>');
+        });
+    }
+    // Making sure the user chooses r, p, or s
+    if ((userGuess == 'rock') || (userGuess == 'paper') || (userGuess == 'scissors')) {
+        console.log('Game Selections Success!');
+        // Test to determine winner 
+        if ((userGuess == 'rock') && (oppGuess == 'scissors')) {
+            wins++;
+        } else if ((userGuess == 'rock') && (oppGuess == 'paper')) {
+            losses++;
+        } else if ((userGuess == 'scissors') && (oppGuess == 'rock')) {
+            losses++;
+        } else if ((userGuess == 'scissors') && (oppGuess == 'paper')) {
+            wins++;
+        } else if ((userGuess == 'paper') && (oppGuess == 'rock')) {
+            wins++;
+        } else if ((userGuess == 'paper') && (oppGuess == 'scissors')) {
+            losses++;
+        } else if (userGuess == oppGuess) {
+            ties++;
         }
-        // Making sure the user chooses r, p, or s
-        if ((userGuess == 'rock') || (userGuess == 'paper') || (userGuess == 'scissors')) {
-            console.log('Game Selections Success!');
-            // Test to determine winner 
-            if ((userGuess == 'rock') && (oppGuess == 'scissors')) {
-                wins++;
-            } else if ((userGuess == 'rock') && (oppGuess == 'paper')) {
-                losses++;
-            } else if ((userGuess == 'scissors') && (oppGuess == 'rock')) {
-                losses++;
-            } else if ((userGuess == 'scissors') && (oppGuess == 'paper')) {
-                wins++;
-            } else if ((userGuess == 'paper') && (oppGuess == 'rock')) {
-                wins++;
-            } else if ((userGuess == 'paper') && (oppGuess == 'scissors')) {
-                losses++;
-            } else if (userGuess == oppGuess) {
-                ties++;
-            }
-        }
-        // //rock, paper, scissors logic and return whether you won, lost, or had a draw.
-        //     switch(userGuess) {
-        //     case 'rock':
-        //       switch(oppGuess) {
-        //             case 'rock':
-        //                 return 'draw';
-        //             case 'paper':
-        //                 return 'lose';
-        //             case 'scissors':
-        //                 return 'win';
-        //         }
-        //       break;
-        //     case 'paper':
-        //         switch(oppGuess) {
-        //             case 'rock':
-        //                 return 'win';
-        //             case 'paper':
-        //                 return 'draw';
-        //             case 'scissors':
-        //                 return 'lose';
-        //         }
-        //       break;
-        //     case 'scissors':
-        //         switch(oppGuess) {
-        //             case 'rock':
-        //                 return 'lose';
-        //             case 'paper':
-        //                 return 'win';
-        //             case 'scissors':
-        //                 return 'draw';
-        //         }
-        //         break;
-        //     }
-        //  }
-    });
+    }
+    // //rock, paper, scissors logic and return whether you won, lost, or had a draw.
+    //     switch(userGuess) {
+    //     case 'rock':
+    //       switch(oppGuess) {
+    //             case 'rock':
+    //                 return 'draw';
+    //             case 'paper':
+    //                 return 'lose';
+    //             case 'scissors':
+    //                 return 'win';
+    //         }
+    //       break;
+    //     case 'paper':
+    //         switch(oppGuess) {
+    //             case 'rock':
+    //                 return 'win';
+    //             case 'paper':
+    //                 return 'draw';
+    //             case 'scissors':
+    //                 return 'lose';
+    //         }
+    //       break;
+    //     case 'scissors':
+    //         switch(oppGuess) {
+    //             case 'rock':
+    //                 return 'lose';
+    //             case 'paper':
+    //                 return 'win';
+    //             case 'scissors':
+    //                 return 'draw';
+    //         }
+    //         break;
+    //     }
+    //  }
 }
 //MESSAGING DESIGN
 function displayMessage(key, name, text) {
