@@ -65,7 +65,7 @@ function nameSelection() {
     $('#nameSubmit').on('click', function () {
         userName = $('#name').val().trim();
         dB.ref('players/').once("value", function (snap) {
-            a = snap.hasChildren(); // true
+            a = snap.hasChildren(); // if pushed data awill return true
             if (a === false) {
                 playerNumber = 1;
                 playerOneStatus();
@@ -81,11 +81,17 @@ function nameSelection() {
             });
         });
         $('#nameForm').addClass('hidden');
-        $('#playerTwoResults').removeClass('hidden');
         return false;
     });
 }
 playGame();
+
+function playerWaiting() {
+    dB.ref('players/').on('value', function (snap) {
+        playersObject = snap.val();
+        console.log(playersObject.length);
+    });
+}
 
 function getSnapOfPlayers() {
     dB.ref('players/').on('value', function (snap) {
@@ -104,6 +110,7 @@ function playerOneStatus() {
 function playerTwoStatus() {
     $('#loginMessage').html('<p>Hi ' + userName + '! You are Player 2</p>');
     $('#currentStatus').html('<p>Waiting on Player 1 To Choose!</p>');
+    $('#playerTwoResults').removeClass('hidden');
 }
 //need to set turn to firebase to track both computers being able to see
 function playGame() {
